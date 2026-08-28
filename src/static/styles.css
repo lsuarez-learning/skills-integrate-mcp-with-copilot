@@ -16,12 +16,74 @@ body {
 }
 
 header {
+  position: relative;
   text-align: center;
   padding: 20px 0;
   margin-bottom: 30px;
   background-color: #1a237e;
   color: white;
   border-radius: 5px;
+}
+
+.account-controls {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.account-controls button {
+  background-color: white;
+  color: #1a237e;
+}
+
+.account-controls button:hover {
+  background-color: #e8eaf6;
+}
+
+#teacher-only-message {
+  margin-bottom: 15px;
+  color: #555;
+}
+
+dialog {
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  margin: auto;
+  padding: 25px;
+  width: min(90vw, 400px);
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+dialog h3 {
+  margin-bottom: 20px;
+  color: #1a237e;
+}
+
+dialog label {
+  display: block;
+  font-weight: bold;
+  margin: 12px 0 5px;
+}
+
+dialog input {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  padding: 10px;
+  width: 100%;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
 }
 
 header h1 {
