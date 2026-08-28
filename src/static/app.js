@@ -3,6 +3,35 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const loginButton = document.getElementById("login-button");
+  const logoutButton = document.getElementById("logout-button");
+  const authStatus = document.getElementById("auth-status");
+  const teacherOnlyMessage = document.getElementById("teacher-only-message");
+  const loginDialog = document.getElementById("login-dialog");
+  const loginForm = document.getElementById("login-form");
+  const cancelLogin = document.getElementById("cancel-login");
+  const loginMessage = document.getElementById("login-message");
+  let authenticated = false;
+
+  function updateAuthControls(username) {
+    authenticated = Boolean(username);
+    authStatus.textContent = authenticated
+      ? `Logged in as ${username}`
+      : "Students can browse activities";
+    loginButton.classList.toggle("hidden", authenticated);
+    logoutButton.classList.toggle("hidden", !authenticated);
+    signupForm.classList.toggle("hidden", !authenticated);
+    teacherOnlyMessage.classList.toggle("hidden", authenticated);
+    document.querySelectorAll(".delete-btn").forEach((button) => {
+      button.classList.toggle("hidden", !authenticated);
+    });
+  }
+
+  async function fetchAuthState() {
+    const response = await fetch("/auth/me");
+    const auth = await response.json();
+    updateAuthControls(auth.username);
+  }
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -60,6 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.querySelectorAll(".delete-btn").forEach((button) => {
         button.addEventListener("click", handleUnregister);
       });
+      updateAuthControls(authenticated ? authStatus.textContent.replace("Logged in as ", "") : null);
     } catch (error) {
       activitiesList.innerHTML =
         "<p>Failed to load activities. Please try again later.</p>";
@@ -155,6 +185,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  loginButton.addEventListener("click", () => {
+    loginMessage.classList.add("hidden");
+    loginForm.reset();
+    loginDialog.showModal();
+  });
+
+  cancelLogin.addEventListener("click", () => loginDialog.close());
+
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const response = await fetch("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+      }),
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      loginMessage.textContent = result.detail || "Unable to log in.";
+      loginMessage.className = "error";
+      loginMessage.classList.remove("hidden");
+      return;
+    }
+    loginDialog.close();
+    updateAuthControls(result.username);
+    fetchActivities();
+  });
+
+  logoutButton.addEventListener("click", async () => {
+    await fetch("/auth/logout", { method: "POST" });
+    updateAuthControls(null);
+    fetchActivities();
+  });
+
   // Initialize app
-  fetchActivities();
+  fetchAuthState().then(fetchActivities);
 });
